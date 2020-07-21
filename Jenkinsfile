@@ -6,11 +6,10 @@ pipeline {
             steps {
                 
                 echo 'Hello World'
-                
-                git("https://github.com/saireddyavs/Ansible-mysql-flask-EC2-nagios")
+        
                 
               
-                sh "ansible-playbook -vvvv ${WORKSPACE}/run_setup.yml"
+                sh "ansible-playbook -vvvv ${WORKSPACE}/run_setup.yml -e env_to_run=Docker"
             }
             
         }
