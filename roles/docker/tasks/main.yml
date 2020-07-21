@@ -11,7 +11,8 @@
       #docker-compose working in docker-playground , but now working in EC2 instance and my computer docker,docker-py are making issues.
       # docker_compose:
       #   project_src: "{{ role_path }}/files"
-      shell: sudo docker-compose -f "{{ role_path }}"/files/docker-compose.yml  up --build -d
+      shell: docker-compose -f "{{ role_path }}"/files/docker-compose.yml  up --build -d
+      become: true
       register: output
 
     - name: debugging docker compose 
