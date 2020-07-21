@@ -1,0 +1,54 @@
+---
+   - name: Stop #EC2 instances
+     hosts: localhost
+     gather_facts: false
+
+     vars:
+       instance_ids:
+         - 'i-089a9bb7d556e7143'  #your can declare multiple id's also
+       region: ap-south-1
+
+     tasks:
+        - name: Stop the sandbox instances
+          ec2:
+             instance_ids: '{{ instance_ids }}'
+             region: '{{ region }}'
+             state: restarted
+             wait: True
+          register: ec2
+        - name: cleaning host file
+          lineinfile:
+            path: hosts
+            regexp: '.*'
+            state: absent
+
+        - name: line1
+          lineinfile:
+            path: hosts
+            line: "[webservers]"
+            insertafter: EOF
+
+        - name: Add the newly created EC2 instance(s) to the local host group
+          lineinfile:
+                path: hosts
+
+                insertafter: EOF
+                line: '{{ item.public_ip }}'
+
+          with_items: '{{ec2.instances}}'
+
+        - name: line1
+          lineinfile:
+            path: hosts
+            line: "[monitoring-servers]"
+            insertafter: EOF
+
+        - name: Add the newly created EC2 instance(s) to the local host group
+          lineinfile:
+                path: hosts
+
+                insertafter: "^[webservers]"
+                line: '{{ item.public_ip }}'
+                firstmatch: yes
+                state: present
+          with_items: '{{ec2.instances}}'

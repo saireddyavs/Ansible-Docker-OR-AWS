@@ -1,0 +1,38 @@
+---
+# tasks file for install_dependencies
+
+
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
+
+
+    - name: Install all required dependencies
+
+      apt:
+        pkg:
+           - python
+           - build-essential
+           - python-dev
+           - python-virtualenv
+           - libpq-dev
+           - git
+           - python-setuptools
+           - libmysqlclient-dev
+
+           - python3-pip
+
+
+        state : present
+
+
+      become: true
+
+
+
+    - name:    Ensure  modules are installed
+      pip:
+        name:    [ "Flask", "Flask-MySQLdb", "WTForms","passlib","Flask-Script"]
+        extra_args: "--user"

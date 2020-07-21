@@ -1,0 +1,14 @@
+---
+# handlers file for flask_setup
+
+  - name: Start Nginx
+    service:
+      name: nginx 
+      state: started
+
+  - name: RestartNginx
+    service: 
+      name: nginx
+      state: restarted
+
+    

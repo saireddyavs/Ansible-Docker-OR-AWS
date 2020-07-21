@@ -1,0 +1,32 @@
+---
+
+- hosts : localhost
+  become: true
+  gather_facts: yes
+  become_method: sudo
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+    
+  tasks:
+      - name: Check is docer-compose installed
+        shell: command -v docker-compose >/dev/null 2>&1
+        register: is_docker_compose_install
+        ignore_errors: yes
+      
+      - debug: msg="{{ is_docker_compose_install.rc }}" # it returns rc 0 if installed or 127 if not
+      - debug: var=is_docker_compose_install
+
+
+- hosts : localhost
+
+    
+  become: true
+  gather_facts: yes
+  become_method: sudo
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  roles :
+
+       - {role: docker_compose_install, when : is_docker_compose_install.rc==127}
+

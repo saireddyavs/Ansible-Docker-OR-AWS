@@ -1,0 +1,13 @@
+---
+# vars file for mysql_create
+
+mysql_root_password: password
+
+database_name: Gym
+
+database_file_name: gym.sql # added in github 
+
+
+code_repo: https://github.com/saireddyavs/Gym-appication.git
+
+

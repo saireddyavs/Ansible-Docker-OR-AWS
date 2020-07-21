@@ -1,0 +1,35 @@
+---
+
+
+nagios_users:
+  - user: nagiosadmin
+    pass: password
+
+packages_needed:
+
+
+   - nginx
+   - gunicorn3
+   - python-flask
+   - python
+   - build-essential
+   - python-dev
+   - libpq-dev
+   - git
+   - python-setuptools
+   - libmysqlclient-dev
+   - python3-pip
+   - mysql-server
+
+
+remote_user_web_servers: ubuntu
+
+remote_user_monitoring_server: ubuntu
+
+run_environment: "{{ env_to_run | default('AWS') }}"
+
+
+
+
+
+

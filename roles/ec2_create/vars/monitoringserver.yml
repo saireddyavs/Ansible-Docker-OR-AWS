@@ -1,0 +1,25 @@
+
+
+keypair: jenkins_ubuntu
+
+security_group : flask_servers
+
+region: ap-south-1
+
+instance_type: t2.micro
+
+image: ami-02d55cb47e83a99a0
+
+count: 1
+
+volume_size: 14
+
+tag_name: monitoring_server
+
+volume_type: gp2
+
+volume_device_name: /dev/sda1
+
+delete_on_terminate: true
+
+

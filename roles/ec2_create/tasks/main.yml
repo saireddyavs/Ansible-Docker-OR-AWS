@@ -1,0 +1,166 @@
+---
+# tasks file for ec2_create
+
+
+        - name:    Ensure botocore and boto3 modules are installed
+          pip:
+            name:    [ "boto3", "botocore", "boto"]
+            extra_args: "--user"
+
+          
+        - name: including webserver variables
+          include_vars: webserver.yml
+
+
+
+
+        - name: cleaning host file
+          lineinfile:
+            path: hosts
+            regexp: '.*'
+            state: absent
+        - name: Create a security group
+          ec2_group:
+            aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+            aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+            name: "{{ security_group }}"
+            description: The webservers security group
+            region: "{{ region }}"
+
+            rules:
+              - proto: tcp
+                from_port: 22
+                to_port: 22
+                cidr_ip: 0.0.0.0/0
+              - proto: tcp
+                from_port: 80
+                to_port: 80
+                cidr_ip: 0.0.0.0/0
+              - proto: tcp
+                from_port: 443
+                to_port: 443
+                cidr_ip: 0.0.0.0/0
+            rules_egress:
+              - proto: all
+                cidr_ip: 0.0.0.0/0
+
+
+        - name: Launch the new EC2 Instance
+          ec2:
+            key_name : "{{keypair}}"
+            aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+            aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+
+            group: "{{ security_group }}"
+            instance_type: "{{ instance_type }}"
+            image: "{{ image }}"
+            wait: true
+            region: "{{ region }}"
+
+            count: "{{count}}"
+            volumes:
+             - device_name: "{{volume_device_name}}"
+               volume_type: "{{ volume_type }}"
+               volume_size: "{{ volume_size }}"
+               delete_on_termination: "{{delete_on_terminate}}"
+            instance_tags:
+              Name : "{{ tag_name}}"
+
+        
+          register: ec2
+
+
+        
+
+
+        - name: line1
+          lineinfile:
+            path: hosts
+            line: "[webservers]"
+            insertafter: EOF
+
+        - name: Add the newly created EC2 instance(s) to the local host group
+          lineinfile:
+                path: hosts
+
+                insertafter: EOF
+                line: '{{ item.public_ip }}'
+
+          with_items: '{{ec2.instances}}'
+
+
+
+        - name: Wait for SSH to come up
+          wait_for:
+            host: "{{ item.public_ip }}"
+            port: 22
+            state: started
+          with_items: '{{ec2.instances}}'
+
+
+
+        - name: accept new ssh fingerprints
+          shell: ssh-keyscan -H {{ item.public_ip }} >> ~/.ssh/known_hosts
+          with_items: '{{ ec2.instances }}'
+
+
+        
+        - name: including vars for monitoring web servers
+          include_vars: monitoringserver.yml
+
+
+        - name: Launch the new EC2 Instance
+          ec2:
+            key_name : "{{keypair}}"
+            aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+            aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+
+            group: "{{ security_group }}"
+            instance_type: "{{ instance_type }}"
+            image: "{{ image }}"
+            wait: true
+            region: "{{ region }}"
+
+            count: "{{count}}"
+            volumes:
+             - device_name: "{{volume_device_name}}"
+               volume_type: "{{ volume_type }}"
+               volume_size: "{{ volume_size }}"
+               delete_on_termination: "{{delete_on_terminate}}"
+            instance_tags:
+              Name : "{{ tag_name}}"
+
+        
+          register: ec2
+
+
+
+       
+        - name: line1
+          lineinfile:
+            path: hosts
+            line: "[monitoring-servers]"
+            insertafter: EOF
+
+        - name: Add the newly created EC2 instance(s) to the local host group
+          lineinfile:
+                path: hosts
+
+                insertafter: EOF
+                line: '{{ item.public_ip }}'
+
+          with_items: '{{ec2.instances}}'
+        
+        
+        - name: Wait for SSH to come up
+          wait_for:
+            host: "{{ item.public_ip }}"
+            port: 22
+            state: started
+          with_items: '{{ec2.instances}}'
+        
+        
+        
+        - name: accept new ssh fingerprints
+          shell: ssh-keyscan -H {{ item.public_ip }} >> ~/.ssh/known_hosts
+          with_items: '{{ ec2.instances }}'

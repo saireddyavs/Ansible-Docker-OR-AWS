@@ -1,0 +1,67 @@
+---
+
+
+
+
+
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+
+
+    - name: Install all required dependencies
+
+      apt:
+        pkg:
+           - nginx
+           - python3-venv
+           - gunicorn3
+           - python-flask
+
+
+
+
+
+        state : present
+
+
+      become: true
+
+
+
+    - name : rmeoving default nginx sites
+      shell: rm /etc/nginx/sites-enabled/default
+      become : yes
+
+    - name: copy sites
+      copy:
+        src: supervisor.j2
+        dest: /etc/nginx/sites-available/example.com
+      become: yes
+
+    - name: ls
+      shell: ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/example.com
+
+    - name: restart nginx
+      service: name=nginx state=restarted
+
+
+    - name: Get the codebase
+
+      git:
+        repo: "{{ code_repo }}"
+        dest: "/home/ubuntu/code"
+      become: true
+
+
+    - name:    Ensure  modules are installed
+      pip:
+        name:    [ "Flask", "Flask-MySQLdb", "WTForms","passlib","Flask-Script"]
+        extra_args: "--user"
+
+
+    - name :  running gunicorn3
+      shell : gunicorn3 --chdir  /home/ubuntu/code app:app --daemon

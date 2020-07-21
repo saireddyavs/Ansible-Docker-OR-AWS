@@ -1,0 +1,85 @@
+---
+# tasks file for mysql_create
+
+  - name: Update and upgrade apt packages
+    become: true
+    apt:
+      update_cache: yes
+      upgrade: 'yes'
+    when: ansible_os_family == 'Debian'
+
+  - name: upgrade all packages
+    yum: 
+      name: "*"
+      state: latest
+    when: ansible_os_family == 'RedHat'
+
+    
+  - name: install all required dependencies
+    package:
+      name: "{{item}}"
+      state: present
+    with_items:
+       -  "{{packages_needed}}"
+    
+    become: yes
+
+
+
+
+
+  
+  - name: Make sure pymysql is present
+    become: true # needed if the other tasks are not played as root
+    pip:
+      name: pymysql
+      state: present
+  - name: Start the MySQL service
+    become : true
+    service:
+      name: mysql
+      state: started
+      enabled: true
+  - name: update mysql root password for all root accounts
+    become : true
+    mysql_user:
+      name: root
+      host: "{{ item }}"
+      password: "{{ mysql_root_password }}"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      check_implicit_admin: yes
+      priv: "*.*:ALL,GRANT"
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+    with_items:
+      - "{{ ansible_hostname }}"
+      - 127.0.0.1
+      - ::1
+      - localhost
+
+  - name: Create a new database with name 'bobdata'
+    mysql_db:
+        name: "{{database_name}}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+
+
+  - name: Get the codebase
+
+    git:
+          repo: "{{ code_repo }}"
+          dest: "code"
+    become: true
+
+
+  - name: Import Databases
+    mysql_db:
+       login_unix_socket: /var/run/mysqld/mysqld.sock
+       login_password: "{{mysql_root_password}}"
+       login_user: root
+       name: "{{database_name}}"
+       state: import
+       target: "/home/{{ansible_ssh_user }}/code/{{database_file_name}}"
