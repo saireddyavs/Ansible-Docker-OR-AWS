@@ -2,8 +2,8 @@
 ## Details
 
 Deploy any number of EC2 Sample flask web servers with  mysql  and Extra EC2 instance which monitor all web servers.
-#### update-1
-Now you can also deploy application using Docker Containers in your computer.
+
+ you can also deploy application using Docker Containers in your computer.
 
 
 
