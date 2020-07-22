@@ -1,2 +1,4 @@
 ---
 # vars file for docker
+
+code_repo: https://github.com/saireddyavs/Gym-appication.git
