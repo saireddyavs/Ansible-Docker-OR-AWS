@@ -1,4 +1,0 @@
----
-# handlers file for flask
-        - name: Restart Application Server
-          supervisorctl: name={{app_name}} state=restarted

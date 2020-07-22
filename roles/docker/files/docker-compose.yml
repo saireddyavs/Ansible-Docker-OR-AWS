@@ -21,6 +21,7 @@ services:
     networks:
       - backnet
       - frontnet
+   
   proxy:
     build: proxy
     restart: always

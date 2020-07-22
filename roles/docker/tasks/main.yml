@@ -7,8 +7,38 @@
 
       git:
             repo: "{{ code_repo }}"
-            dest: "code"
+            dest: "{{ role_path }}/files/code"
       become: true
+
+      #https://stackoverflow.com/questions/27985334/why-is-copying-a-directory-with-ansible-so-slow
+    - name: Copying code
+      synchronize:
+        src: "{{ role_path }}/files/code/"
+        dest: "{{ role_path }}/files/backend"
+        # mode: '0777'
+      become: true
+    
+    - name: Permissions change
+      file:
+        path:  "{{ role_path }}/files/backend"
+        mode: '0777'
+        recurse: yes
+      become: true
+
+    - name: Copying Dockerfile
+      copy:
+        src: "{{ role_path }}/files/Dockerfile"
+        dest: "{{ role_path }}/files/backend" 
+      
+    
+    - name: Copying sql file
+      copy:
+        src: "{{ role_path }}/files/code/{{database_file_name}}"
+        dest: "{{ role_path }}/files/db/init.sql"
+        mode: '0777'
+      become: true
+
+    
 
 
 
