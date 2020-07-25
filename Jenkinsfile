@@ -45,7 +45,7 @@ pipeline {
       }
     }
 
-    stage('Hello') {
+    stage('Running Ansible Playbook') {
       steps {
 
         echo 'Hello World'
@@ -53,10 +53,78 @@ pipeline {
 
 
 
-        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=yoursystempass -e env_to_run=Docker"
+        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=system_password -e env_to_run=Docker"
       }
 
     }
+
+    stage('Artifactory configuration') {
+      steps {
+        rtServer(
+          id: "Artifactory-1",
+          username: 'admin',
+          password: 'artifactory_password',
+
+
+          url: 'http://localhost:8081/artifactory',
+
+        )
+      }
+    }
+
+
+    stage('Push image to Artifactory') {
+      steps {
+        rtDockerPush(
+
+          serverId: "Artifactory-1",
+
+          image: 'localhost:8081/docker-local/proj_mysql',
+          // Host:
+          // On OSX: "tcp://127.0.0.1:1234"
+          // On Linux can be omitted or null
+
+          targetRepo: 'docker-local',
+          // Attach custom properties to the published artifacts:
+          properties: 'project-name=docker1;status=stable'
+        )
+        rtDockerPush(
+
+          serverId: "Artifactory-1",
+
+          image: 'localhost:8081/docker-local/proj_backend',
+          // Host:
+          // On OSX: "tcp://127.0.0.1:1234"
+          // On Linux can be omitted or null
+
+          targetRepo: 'docker-local',
+          // Attach custom properties to the published artifacts:
+          properties: 'project-name=docker1;status=stable'
+        )
+        rtDockerPush(
+
+          serverId: "Artifactory-1",
+
+          image: 'localhost:8081/docker-local/proj_proxy',
+          // Host:
+          // On OSX: "tcp://127.0.0.1:1234"
+          // On Linux can be omitted or null
+
+          targetRepo: 'docker-local',
+          // Attach custom properties to the published artifacts:
+          properties: 'project-name=docker1;status=stable'
+        )
+      }
+    }
+
+    stage('Publish build info') {
+      steps {
+        rtPublishBuildInfo(
+          serverId: "Artifactory-1"
+        )
+      }
+    }
+
 
 
   }
