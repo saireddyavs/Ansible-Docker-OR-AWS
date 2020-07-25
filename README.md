@@ -58,7 +58,9 @@ Deploy any number of EC2 Sample flask web servers with  mysql  and Extra EC2 ins
 * ```ssh-keygen``` for creating new ssh keys. Accept the default values, and no passphrase, if it prompts you to add the new keys to the home directory, without overwriting existing ones.
 * Now in AWS EC2 keypairs section create a new keypair using ```import key pair``` option which is present in ```Actions```.
 * Change key-pair name accordingly in ```roles/vars/ec2_create``` the default key pair name i have used is ```jenkins_ubuntu```.
-* In future SonarQube suppourt will be added.
+*  SonarQube suppourt is added.
+* artifactory suppourt for pushing docker images to local docker repository is added.
+* change ```system_password``` and ```artifactory_password``` in ```Jenkinsfile```.
 
 
 
