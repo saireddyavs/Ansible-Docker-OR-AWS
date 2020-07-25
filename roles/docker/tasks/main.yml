@@ -9,6 +9,7 @@
             repo: "{{ code_repo }}"
             dest: "code"
       become: true
+      
 
 
 
@@ -20,6 +21,7 @@
       shell: docker-compose -f "{{ role_path }}"/files/docker-compose.yml  up --build -d
       become: true
       register: output
+
 
     - name: debugging docker compose 
       debug:

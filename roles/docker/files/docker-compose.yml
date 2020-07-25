@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   db:
-    image: mysql:8.0.19
+    build: db
     command: '--default-authentication-plugin=mysql_native_password'
     restart: always
     volumes:
@@ -12,6 +12,7 @@ services:
     environment:
       - MYSQL_DATABASE=example
       - MYSQL_ROOT_PASSWORD=password
+    image: localhost:8081/docker-local/proj_mysql
   backend:
     build: backend
     restart: always
@@ -21,6 +22,7 @@ services:
     networks:
       - backnet
       - frontnet
+    image: localhost:8081/docker-local/proj_backend
   proxy:
     build: proxy
     restart: always
@@ -28,6 +30,7 @@ services:
       - 80:80
     networks:
       - frontnet
+    image: localhost:8081/docker-local/proj_proxy
 volumes:
   db-data:
 
