@@ -2,3 +2,4 @@
 # vars file for docker
 
 code_repo: https://github.com/saireddyavs/Gym-appication.git
+database_file_name: gym.sql # added in github 
