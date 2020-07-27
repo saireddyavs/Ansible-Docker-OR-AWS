@@ -2,6 +2,13 @@ pipeline {
   agent any
 
 
+   environment {
+        WHERE_TO_RUN = 'Docker'
+       
+    }
+
+
+
 
 
   stages {
@@ -53,12 +60,16 @@ pipeline {
 
 
 
-        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=system_password -e env_to_run=Docker"
+        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=system_password -e env_to_run=${WHERE_TO_RUN}"
       }
 
     }
 
     stage('Artifactory configuration') {
+      when {
+                // Only say hello if a "WHRE_TO_RUN" is Docker
+                environment name: 'WHERE_TO_RUN', value: 'Docker' 
+       }
       steps {
         rtServer(
           id: "Artifactory-1",
@@ -74,6 +85,10 @@ pipeline {
 
 
     stage('Push image to Artifactory') {
+      when {
+                // Only say hello if a "WHRE_TO_RUN" is Docker
+                environment name: 'WHERE_TO_RUN', value: 'Docker' 
+       }
       steps {
         rtDockerPush(
 
@@ -86,7 +101,7 @@ pipeline {
 
           targetRepo: 'docker-local',
           // Attach custom properties to the published artifacts:
-          properties: 'project-name=docker1;status=stable'
+          properties: 'project-name=docker1-${JOB_NAME}-${BUILD_NUMBER};status=stable'
         )
         rtDockerPush(
 
@@ -99,7 +114,7 @@ pipeline {
 
           targetRepo: 'docker-local',
           // Attach custom properties to the published artifacts:
-          properties: 'project-name=docker1;status=stable'
+          properties: 'project-name=docker1-${JOB_NAME}-${BUILD_NUMBER};status=stable'
         )
         rtDockerPush(
 
@@ -112,7 +127,7 @@ pipeline {
 
           targetRepo: 'docker-local',
           // Attach custom properties to the published artifacts:
-          properties: 'project-name=docker1;status=stable'
+          properties: 'project-name=docker1-${JOB_NAME}-${BUILD_NUMBER};status=stable'
         )
       }
     }
