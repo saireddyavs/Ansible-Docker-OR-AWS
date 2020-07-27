@@ -4,8 +4,10 @@ pipeline {
 
    environment {
         WHERE_TO_RUN = 'Docker'
+        SYSTEM_PASSWORD='system_password'
        
     }
+
 
 
 
@@ -60,7 +62,7 @@ pipeline {
 
 
 
-        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=system_password -e env_to_run=${WHERE_TO_RUN}"
+        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=${SYSTEM_PASSWORD} -e env_to_run=${WHERE_TO_RUN}"
       }
 
     }
