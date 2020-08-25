@@ -2,11 +2,11 @@ pipeline {
   agent any
 
 
-   environment {
-        WHERE_TO_RUN = 'Docker'
-        SYSTEM_PASSWORD='system_password'
-       
-    }
+  environment {
+    WHERE_TO_RUN = 'Docker'
+    SYSTEM_PASSWORD = 'system_password'
+
+  }
 
 
 
@@ -67,11 +67,63 @@ pipeline {
 
     }
 
+    stage('Running Selenium Tests in AWS') {
+
+      when {
+        // Only say hello if a "WHRE_TO_RUN" is Docker
+        environment name: 'WHERE_TO_RUN', value: 'AWS'
+      }
+
+
+      steps {
+
+        git 'https://github.com/saireddyavs/selenium_gym_app.git'
+        script {
+          env.deployed_ip = sh(script: "http://" + "sed -n '/webservers/{n;p}' ${WORKSPACE}/dev/hosts", returnStdout: true).trim() + "/"
+
+          echo "MYVAR: ${env.deployed_ip}"
+        }
+        dir("test2"){
+          sh "mvn clean compile test -DIPDEPLOYED=${deployed_ip}"
+
+          step([$class: 'Publisher', reportFilenamePattern: ' **/test-ouput/testng-results.xml'])
+        }
+
+      }
+
+    }
+
+    stage('Running Selenium Tests in AWS') {
+
+      when {
+        // Only say hello if a "WHRE_TO_RUN" is Docker
+        environment name: 'WHERE_TO_RUN', value: 'Docker'
+      }
+
+
+      steps {
+
+        git 'https://github.com/saireddyavs/selenium_gym_app.git'
+        script {
+          env.deployed_ip = "https://localhost/"
+
+          echo "MYVAR: ${env.deployed_ip}"
+        }
+        dir("test2"){
+          sh "mvn clean compile test -DIPDEPLOYED=${deployed_ip}"
+
+          step([$class: 'Publisher', reportFilenamePattern: ' **/test-ouput/testng-results.xml'])
+        }
+
+      }
+
+    }
+
     stage('Artifactory configuration') {
       when {
-                // Only say hello if a "WHRE_TO_RUN" is Docker
-                environment name: 'WHERE_TO_RUN', value: 'Docker' 
-       }
+        // Only say hello if a "WHRE_TO_RUN" is Docker
+        environment name: 'WHERE_TO_RUN', value: 'Docker'
+      }
       steps {
         rtServer(
           id: "Artifactory-1",
@@ -88,9 +140,9 @@ pipeline {
 
     stage('Push image to Artifactory') {
       when {
-                // Only say hello if a "WHRE_TO_RUN" is Docker
-                environment name: 'WHERE_TO_RUN', value: 'Docker' 
-       }
+        // Only say hello if a "WHRE_TO_RUN" is Docker
+        environment name: 'WHERE_TO_RUN', value: 'Docker'
+      }
       steps {
         rtDockerPush(
 
