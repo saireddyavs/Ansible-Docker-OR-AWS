@@ -21,48 +21,9 @@
          minutes: 1
 
 
-  # - name: For setting up in AWS 
-  #   include: AWS.yml
-  #   when: run_environment=='AWS'
-
-  - hosts : webservers
-
-    remote_user: "{{remote_user_web_servers}}"
-    become: true
-    gather_facts: yes
-    become_method: sudo
-    vars:
-        ansible_python_interpreter: /usr/bin/python3
-
-    roles :
-
-        - { role: mysql_create , when: run_environment=='AWS' }
-        - {role: flask_setup, when: run_environment=='AWS' }
-
-
-
-
-  - hosts : all
-  
-    remote_user: "{{remote_user_monitoring_server}}"
-    become: true
-    gather_facts: yes
-    become_method: sudo
-  
-  
-  
-    roles:
-    # this is the Ansible Galaxy name, you could change it to Ansible-Nagios if directly downloading from github
-        - {role: 'nagios_install', run_nagios_client: true , when: run_environment=='AWS' }
-  
-  
-  - hosts: monitoring-servers
-    become: true
-    remote_user: "{{remote_user_monitoring_server}}"
-  
-    roles:
-        - {role: 'nagios_install', run_nagios_server: true , when: run_environment=='AWS' }
-
+  - name: For setting up in AWS 
+    include: AWS.yml
+    when: run_environment=='AWS'
 
 
   

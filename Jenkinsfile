@@ -60,19 +60,46 @@ pipeline {
       }
     }
 
-    stage('Running Ansible Playbook') {
+   
+    stage('Running Ansible Playbook in AWS') {
+        
+        when {
+        // Only say hello if a "WHRE_TO_RUN" is Docker
+        environment name: 'WHERE_TO_RUN', value: 'AWS'
+      }
       steps {
 
         echo 'Hello World'
 
+        dir('dev'){
 
 
+        sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=${SYSTEM_PASSWORD}"
+      }
+      }
+
+    }
+    
+    stage('Running Ansible Playbook in Docker') {
+        
+        when {
+        // Only say hello if a "WHRE_TO_RUN" is Docker
+        environment name: 'WHERE_TO_RUN', value: 'Docker'
+      }
+      steps {
+
+        echo 'Hello World'
+
+        
+        dir('dev'){
 
         sh "ansible-playbook ${WORKSPACE}/dev/run_setup.yml -e ansible_become_pass=${SYSTEM_PASSWORD} -e env_to_run=${WHERE_TO_RUN}"
+      }
       }
 
     }
 
+        
     stage('Running Selenium Tests in AWS') {
 
       when {
@@ -88,12 +115,16 @@ pipeline {
 
         git 'https://github.com/saireddyavs/selenium_gym_app.git'
         script {
-          env.deployed_ip = sh(script: "http://" + "sed -n '/webservers/{n;p}' ${WORKSPACE}/dev/hosts", returnStdout: true).trim() + "/"
+          env.deployed_ip = sh(script:  "sed -n '/webservers/{n;p}' ${WORKSPACE}/dev/hosts", returnStdout: true).trim()
+          env.header="http:/"
+         
 
           echo "MYVAR: ${env.deployed_ip}"
         }
         dir("test2"){
-          sh "mvn clean compile test -DIPDEPLOYED=${deployed_ip}"
+            
+          sh "mvn clean compile test -DIPDEPLOYED=${header}/${deployed_ip}/"
+          
 
           step([$class: 'Publisher', reportFilenamePattern: ' **/test-ouput/testng-results.xml'])
         }
@@ -103,7 +134,8 @@ pipeline {
 
     }
 
-    stage('Running Selenium Tests in Docker') {
+
+ stage('Running Selenium Tests in Docker') {
 
       when {
         // Only say hello if a "WHRE_TO_RUN" is Docker
@@ -112,14 +144,14 @@ pipeline {
 
 
       steps {
-
+         
         sh 'mkdir -p test'
-
+    
+    
         dir('test'){
-
         git 'https://github.com/saireddyavs/selenium_gym_app.git'
         script {
-          env.deployed_ip = "https://localhost/"
+          env.deployed_ip = "http://localhost/"
 
           echo "MYVAR: ${env.deployed_ip}"
         }
