@@ -70,7 +70,7 @@ pipeline {
     stage('Running Selenium Tests in AWS') {
 
       when {
-        // Only say hello if a "WHRE_TO_RUN" is Docker
+        // Only say hello if a "WHRE_TO_RUN" is AWS
         environment name: 'WHERE_TO_RUN', value: 'AWS'
       }
 
@@ -93,7 +93,7 @@ pipeline {
 
     }
 
-    stage('Running Selenium Tests in AWS') {
+    stage('Running Selenium Tests in Docker') {
 
       when {
         // Only say hello if a "WHRE_TO_RUN" is Docker
