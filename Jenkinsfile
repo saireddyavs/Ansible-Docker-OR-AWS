@@ -15,6 +15,12 @@ pipeline {
 
   stages {
 
+    stage("Clean WorkSpace"){
+          steps{
+              cleanWs()
+          }
+      }
+
     stage('CheckoutApplication') {
       steps {
         sh 'mkdir -p application'
@@ -77,6 +83,9 @@ pipeline {
 
       steps {
 
+        sh 'mkdir -p test'
+        dir('test'){
+
         git 'https://github.com/saireddyavs/selenium_gym_app.git'
         script {
           env.deployed_ip = sh(script: "http://" + "sed -n '/webservers/{n;p}' ${WORKSPACE}/dev/hosts", returnStdout: true).trim() + "/"
@@ -89,6 +98,7 @@ pipeline {
           step([$class: 'Publisher', reportFilenamePattern: ' **/test-ouput/testng-results.xml'])
         }
 
+        }
       }
 
     }
@@ -103,6 +113,10 @@ pipeline {
 
       steps {
 
+        sh 'mkdir -p test'
+
+        dir('test'){
+
         git 'https://github.com/saireddyavs/selenium_gym_app.git'
         script {
           env.deployed_ip = "https://localhost/"
@@ -115,6 +129,7 @@ pipeline {
           step([$class: 'Publisher', reportFilenamePattern: ' **/test-ouput/testng-results.xml'])
         }
 
+      }
       }
 
     }
